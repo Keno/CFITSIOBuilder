@@ -1,0 +1,40 @@
+language: julia
+os:
+  - linux
+julia:
+  - 0.6
+notifications:
+  email: false
+git:
+  depth: 99999999
+cache:
+  timeout: 1000
+  directories:
+    - downloads
+env:
+  global:
+    - BINARYBUILDER_DOWNLOADS_CACHE=downloads
+    - BINARYBUILDER_AUTOMATIC_APPLE=false
+sudo: required
+
+# Before anything else, get the latest versions of things
+before_script:
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryProvider.jl")'
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryBuilder.jl"); Pkg.build()'
+
+script:
+  - julia build_tarballs.jl
+
+
+deploy:
+    provider: releases
+    api_key:
+        # Note; this api_key is only valid for Keno/CFITSIOBuilder; you need
+        # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+        secure: x0c8Tu32LsEbZE8zS1bLsORM+dTbyQERzPErqWCzuirEyKSA104x3EkN1YZhjCQpl6wrYu/8tunqL/T75OhNoJibI1jddLt5iTWpbs8q2fLFBTjzeOp0wOkbZ3U/b+TuGDo2K3XY5UCEUy74jayrLKRAzuWeq4C0dTpXmn0k8H+3SK8LDnTgsOWNpvi0wuz6XR5mmLzSGbjcRvrP59zjZLvbgFzgMsGZVK5nL9ah7ImrCzAkHo5xrveUPRaN4cF7MJrga5uXzMAkPr94V7Zoec8trsh8aLnwD2DdLSDg8WvK2YvI0rEMFHSrKOmu+Pf8lfvo3hY7GxOTZkFB3Zf3fjOFZ4CDGjivKHWh7/s+kkO+ZoalIM526tW8hulaEC1ZmFKQaKD6EnZdQDxPHKlDCpnA0EzJbQMNyUizQDAEOJ3n2cCuiNE+0jMo2+xZ5URN993UbaShH/JZr43DxfRa5Y6HkcH8GN7ZMKMSm7VZ6YJ9e4OV+HV/09zpuCDyUtZKl/MPfyCm6iws0SZqs7E0+TpcOpMhX2834sGzaxblaMR5hPImMIugEO/LJqPBNMhf45cT9d5xHnaDe2jFeDOz5gGCH3y4IoTbkGTzzgOSS5cVF8nPSTzWPxYbIEUbq8PItEhe+tO55Nh1SU//doZBioyd+dKuVZTIkJ6Yl+QbMf0=
+    file_glob: true
+    file: products/*
+    skip_cleanup: true
+    on:
+        repo: Keno/CFITSIOBuilder
+        tags: true
